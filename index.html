@@ -1,0 +1,196 @@
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> -->
+
+<!DOCTYPE html>
+
+<html lang="zh-Hant-TW">
+
+  <head>
+
+    <title>Get Real Time Option Price</title>
+
+    <meta http-equiv="Content-Language" content="zh-tw" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+
+    <meta name="theme-color" content="#FFFFFF" />
+
+		<meta name="robots" content="index,follow" />
+		
+    <meta name="keywords" content="Option,選擇權,即時臺指選擇權銷售資料" />
+    <meta name="description" content="Option Real Time Price" />
+
+    <meta name="author" content="ace33022" />
+		<meta name="force-login" content="N" />
+		<meta name="load-nw_inject_end" content="Y" />
+
+		<!-- <base href="/" /> -->
+		<!-- <base href="W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/" /> -->
+		<base href="/" />
+		
+		<!-- <link type="image/png" rel="icon" href="icon/favicon.png" /> -->
+		<link type="image/png" rel="icon" href="icon/favicon.ico" />
+		
+		<!--
+			--
+			-- @see {@link https://meyerweb.com/eric/tools/css/reset/|CSS Tools: Reset CSS}
+			-- @see {@link https://meyerweb.com/eric/tools/css/reset/reset.css|https://meyerweb.com/eric/tools/css/reset/reset.css}
+			--
+			-->
+		<!-- <link type="text/css" rel="stylesheet" href="stylesheet/tablesort-reset.css" /> -->
+
+		<!-- <link type="text/css" rel="stylesheet" href="javascript/tablesort/tablesort.css" /> -->
+		<!-- <link type="text/css" rel="stylesheet" href="javascript/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css" /> -->
+		
+		<script type="text/javascript">
+		
+			var base;
+			
+			/**
+			 *
+			 * @see {@link https://stackoverflow.com/questions/3494954/how-do-i-set-a-pages-base-href-in-javascript|How do I set a page's base href in Javascript? - Stack Overflow}
+			 *
+			 * @comment 2020/12/06 ace Firebox還未支援base標簽？
+			 * @comment 2020/12/06 ace Chrome設定base標籤後會重新載入script檔案！？藉由這個特性達到程式化載入指定檔案！！
+			 * @comment 2021/06/24 ace 重設base標籤，只會重新載入script檔案，但不會重新載入css檔案？！
+			 *
+			 */
+			// document.write('<base href="W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/" />');
+			
+			if (document.getElementsByTagName('head')[0].getElementsByTagName('base').length == 0) {
+			
+				base = document.createElement('base');
+				
+				document.head.appendChild(base);
+			}
+			else {
+			
+				base = document.getElementsByTagName('head')[0].getElementsByTagName('base')[0];
+			}
+			
+			if (location.protocol == 'file:') {
+				
+				base.setAttribute('href', 'W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/');
+			}
+			else if (location.origin.startsWith('http')) {
+			
+				console.log('in http');
+			
+				if ((location.origin.indexOf('127.0.0.1') !== -1) && (location.origin.indexOf('localhost') !== -1)) {
+				
+					base.setAttribute('href', 'https://ace33022.github.io/');
+				}
+			}
+		</script>
+		
+		<script type="text/javascript" src="javascript/tw/ace33022/NameSpace.js"></script>
+
+		<script type="text/javascript" src="javascript/tw/ace33022/DefaultConfiguration.js"></script>
+		<script type="text/javascript" src="javascript/tw/Configuration.js"></script>
+		
+		<script type="text/javascript" src="javascript/tw/ace33022/RequireJSConfig.js"></script>
+
+		<!--
+		<script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/NameSpace.js"></script>
+
+    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/DefaultConfigurations.js"></script>
+    <script type="text/javascript" src="https://ace33022.github.io/tw/Configurations.js"></script>
+		
+    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/RequireJSConfig.js"></script>
+		-->
+  </head>
+
+	<body class="container-fluid" style="overflow-y: hidden;">
+	
+		<!--
+			--
+			-- @see {@link https://meyerweb.com/eric/tools/css/reset/|CSS Tools: Reset CSS}
+			-- @see {@link https://meyerweb.com/eric/tools/css/reset/reset.css|https://meyerweb.com/eric/tools/css/reset/reset.css}
+			--
+			-->
+    <style type="text/css">
+		
+			/*
+			table {
+			
+				margin: 0;
+				padding: 0;
+				border: 0;
+				font-size: 100%;
+				font: inherit;
+				vertical-align: baseline;
+			}
+			
+			table { 
+			
+				border-collapse: collapse; 
+				border-spacing: 0; 
+			}
+			
+			table {
+			
+				background: #fff;
+				max-width: 100%;
+				border-spacing: 0;
+				width: 100%;
+				margin: 10px 0;
+				border: 1px solid #ddd;
+				border-collapse: separate;
+				*border-collapse: collapsed;
+				-webkit-box-shadow: 0 0 4px rgba(0,0,0,0.10);
+					 -moz-box-shadow: 0 0 4px rgba(0,0,0,0.10);
+								box-shadow: 0 0 4px rgba(0,0,0,0.10);
+			}
+			
+			table th, table td {
+			
+				padding: 8px;
+				line-height: 18px;
+				text-align: left;
+				border-top: 1px solid #ddd;
+			}
+			
+			table th {
+			
+				background: #eee;
+				background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#eee));
+				background: -moz-linear-gradient(top, #f6f6f6, #eee);
+				text-shadow: 0 1px 0 #fff;
+				font-weight: bold;
+				vertical-align: bottom;
+			}
+			
+			table td {
+			
+				vertical-align: top;
+			}
+			
+			table thead:first-child tr th, table thead:first-child tr td {
+			
+				border-top: 0;
+			}
+			
+			table tbody + tbody {
+			
+				border-top: 2px solid #ddd;
+			}
+			
+			table th + th,
+			table td + td,
+			table th + td,
+			table td + th {
+			
+				border-left:1px solid #ddd;
+			}
+			
+			table thead:first-child tr:first-child th,
+			table tbody:first-child tr:first-child th,
+			table tbody:first-child tr:first-child td {
+			
+				border-top: 0;
+			}
+			*/
+		</style>
+	</body>
+</html>
