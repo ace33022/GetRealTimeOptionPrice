@@ -27,6 +27,7 @@
 
 		<!-- <base href="/" /> -->
 		<!-- <base href="W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/" /> -->
+		<!-- <base href="W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/htdoc/" /> -->
 		<base href="/" />
 		
 		<!-- <link type="image/png" rel="icon" href="icon/favicon.png" /> -->
@@ -43,6 +44,23 @@
 		<!-- <link type="text/css" rel="stylesheet" href="javascript/tablesort/tablesort.css" /> -->
 		<!-- <link type="text/css" rel="stylesheet" href="javascript/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css" /> -->
 		
+		<!--
+		<script type="text/javascript" src="javascript/tw/ace33022/NameSpace.js"></script>
+
+		<script type="text/javascript" src="javascript/tw/ace33022/DefaultConfiguration.js"></script>
+		<script type="text/javascript" src="javascript/tw/Configuration.js"></script>
+		
+		<script type="text/javascript" src="javascript/tw/ace33022/RequireJSConfig.js"></script>
+		-->
+
+		<!--
+		<script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/NameSpace.js"></script>
+
+    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/DefaultConfigurations.js"></script>
+    <script type="text/javascript" src="https://ace33022.github.io/tw/Configurations.js"></script>
+		
+    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/RequireJSConfig.js"></script>
+		-->
 		<script type="text/javascript">
 		
 			var base;
@@ -56,8 +74,6 @@
 			 * @comment 2021/06/24 ace 重設base標籤，只會重新載入script檔案，但不會重新載入css檔案？！
 			 *
 			 */
-			// document.write('<base href="W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/" />');
-			
 			if (document.getElementsByTagName('head')[0].getElementsByTagName('base').length == 0) {
 			
 				base = document.createElement('base');
@@ -70,16 +86,14 @@
 			}
 			
 			if (location.protocol == 'file:') {
-				
-				base.setAttribute('href', 'W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/');
+
+				base.setAttribute('href', 'W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/WEB-INF/htdoc/');
 			}
 			else if (location.origin.startsWith('http')) {
 			
-				console.log('in http');
+				if ((location.origin.indexOf('127.0.0.1') === -1) && (location.origin.indexOf('localhost') === -1)) {
 			
-				if ((location.origin.indexOf('127.0.0.1') !== -1) && (location.origin.indexOf('localhost') !== -1)) {
-				
-					base.setAttribute('href', 'https://ace33022.github.io/');
+					base.setAttribute('href', 'https://ace33022.github.io/htdoc/');
 				}
 			}
 		</script>
@@ -90,15 +104,6 @@
 		<script type="text/javascript" src="javascript/tw/Configuration.js"></script>
 		
 		<script type="text/javascript" src="javascript/tw/ace33022/RequireJSConfig.js"></script>
-
-		<!--
-		<script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/NameSpace.js"></script>
-
-    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/DefaultConfigurations.js"></script>
-    <script type="text/javascript" src="https://ace33022.github.io/tw/Configurations.js"></script>
-		
-    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/RequireJSConfig.js"></script>
-		-->
   </head>
 
 	<body class="container-fluid" style="overflow-y: hidden;">
