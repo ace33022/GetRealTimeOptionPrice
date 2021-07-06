@@ -56,7 +56,8 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 	
 	requirejs.config(tw.ace33022.RequireJSConfig);
 	
-	Configuration.loadCSS(Configuration["JSLibDir"] + '/tablesort/tablesort.css');
+	// Configuration.loadCSS(Configuration["JSLibDir"] + '/tablesort/tablesort.css');
+	Configuration.loadCSS('stylesheet/tablesort.css');
 	Configuration.loadCSS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css');
 	
 	requirejs(["tw.ace33022.vo.OptionCallTrnLog", "tw.ace33022.vo.OptionPutTrnLog", "tw.ace33022.util.browser.CommonForm", "tablesort.number", "sprintfjs"], function(OptionCallTrnLog, OptionPutTrnLog, CommonForm) {

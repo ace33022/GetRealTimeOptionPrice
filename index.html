@@ -44,76 +44,6 @@
 		<!-- <link type="text/css" rel="stylesheet" href="javascript/tablesort/tablesort.css" /> -->
 		<!-- <link type="text/css" rel="stylesheet" href="javascript/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css" /> -->
 		
-		<!--
-		<script type="text/javascript" src="javascript/tw/ace33022/NameSpace.js"></script>
-
-		<script type="text/javascript" src="javascript/tw/ace33022/DefaultConfiguration.js"></script>
-		<script type="text/javascript" src="javascript/tw/Configuration.js"></script>
-		
-		<script type="text/javascript" src="javascript/tw/ace33022/RequireJSConfig.js"></script>
-		-->
-
-		<!--
-		<script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/NameSpace.js"></script>
-
-    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/DefaultConfigurations.js"></script>
-    <script type="text/javascript" src="https://ace33022.github.io/tw/Configurations.js"></script>
-		
-    <script type="text/javascript" src="https://ace33022.github.io/tw/ace33022/RequireJSConfig.js"></script>
-		-->
-		<script type="text/javascript">
-		
-			var base;
-			
-			/**
-			 *
-			 * @see {@link https://stackoverflow.com/questions/3494954/how-do-i-set-a-pages-base-href-in-javascript|How do I set a page's base href in Javascript? - Stack Overflow}
-			 *
-			 * @comment 2020/12/06 ace Firebox還未支援base標簽？
-			 * @comment 2020/12/06 ace Chrome設定base標籤後會重新載入script檔案！？藉由這個特性達到程式化載入指定檔案！！
-			 * @comment 2021/06/24 ace 重設base標籤，只會重新載入script檔案，但不會重新載入css檔案？！
-			 *
-			 */
-			if (document.getElementsByTagName('head')[0].getElementsByTagName('base').length == 0) {
-			
-				base = document.createElement('base');
-				
-				document.head.appendChild(base);
-			}
-			else {
-			
-				base = document.getElementsByTagName('head')[0].getElementsByTagName('base')[0];
-			}
-			
-			if (location.protocol == 'file:') {
-
-				base.setAttribute('href', 'W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/WEB-INF/htdoc/');
-			}
-			else if (location.origin.startsWith('http')) {
-			
-				if ((location.origin.indexOf('127.0.0.1') === -1) && (location.origin.indexOf('localhost') === -1)) {
-			
-					base.setAttribute('href', 'https://ace33022.github.io/htdoc/');
-				}
-			}
-		</script>
-		
-		<script type="text/javascript" src="javascript/tw/ace33022/NameSpace.js"></script>
-
-		<script type="text/javascript" src="javascript/tw/ace33022/DefaultConfiguration.js"></script>
-		<script type="text/javascript" src="javascript/tw/Configuration.js"></script>
-		
-		<script type="text/javascript" src="javascript/tw/ace33022/RequireJSConfig.js"></script>
-  </head>
-
-	<body class="container-fluid" style="overflow-y: hidden;">
-	
-		<!--
-			--
-			-- @see {@link https://meyerweb.com/eric/tools/css/reset/|CSS Tools: Reset CSS}
-			-- @see {@link https://meyerweb.com/eric/tools/css/reset/reset.css|https://meyerweb.com/eric/tools/css/reset/reset.css}
-			--
-			-->
     <style type="text/css">
 		
 			/*
@@ -197,5 +127,51 @@
 			}
 			*/
 		</style>
-	</body>
+		
+		<script type="text/javascript">
+		
+			var base;
+			
+			/**
+			 *
+			 * @see {@link https://stackoverflow.com/questions/3494954/how-do-i-set-a-pages-base-href-in-javascript|How do I set a page's base href in Javascript? - Stack Overflow}
+			 *
+			 * @comment 2020/12/06 ace Firebox還未支援base標簽？
+			 * @comment 2020/12/06 ace Chrome設定base標籤後會重新載入script檔案！？藉由這個特性達到程式化載入指定檔案！！
+			 * @comment 2021/06/24 ace 重設base標籤，只會重新載入script檔案，但不會重新載入css檔案？！
+			 *
+			 */
+			if (document.getElementsByTagName('head')[0].getElementsByTagName('base').length == 0) {
+			
+				base = document.createElement('base');
+				
+				document.head.appendChild(base);
+			}
+			else {
+			
+				base = document.getElementsByTagName('head')[0].getElementsByTagName('base')[0];
+			}
+			
+			if (location.protocol == 'file:') {
+
+				base.setAttribute('href', 'W:/tool/package/LangEnv/java/apache-tomcat/webapps/ROOT/WEB-INF/htdoc/');
+			}
+			else if (location.origin.startsWith('http')) {
+			
+				if ((location.origin.indexOf('127.0.0.1') === -1) && (location.origin.indexOf('localhost') === -1)) {
+			
+					base.setAttribute('href', 'https://ace33022.github.io/htdoc/');
+				}
+			}
+		</script>
+		
+		<script type="text/javascript" src="javascript/tw/ace33022/NameSpace.js"></script>
+
+		<script type="text/javascript" src="javascript/tw/ace33022/DefaultConfiguration.js"></script>
+		<script type="text/javascript" src="javascript/tw/Configuration.js"></script>
+		
+		<script type="text/javascript" src="javascript/tw/ace33022/RequireJSConfig.js"></script>
+  </head>
+
+	<body class="container-fluid" style="overflow-y: hidden;"></body>
 </html>
