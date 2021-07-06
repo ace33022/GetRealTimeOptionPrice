@@ -57,8 +57,9 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 	requirejs.config(tw.ace33022.RequireJSConfig);
 	
 	// Configuration.loadCSS(Configuration["JSLibDir"] + '/tablesort/tablesort.css');
+	// Configuration.loadCSS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css');
 	Configuration.loadCSS('stylesheet/tablesort.css');
-	Configuration.loadCSS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css');
+	Configuration.loadCSS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/css/BootSideMenu.css');
 	
 	requirejs(["tw.ace33022.vo.OptionCallTrnLog", "tw.ace33022.vo.OptionPutTrnLog", "tw.ace33022.util.browser.CommonForm", "tablesort.number", "sprintfjs"], function(OptionCallTrnLog, OptionPutTrnLog, CommonForm) {
 	
@@ -111,7 +112,8 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 				
 					if (status == 'success') {
 					
-						Configuration.loadJS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/js/BootSideMenu.js', function() {
+						// Configuration.loadJS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/js/BootSideMenu.js', function() {
+						Configuration.loadJS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/js/BootSideMenu.js', function() {
 						
 							var tag;
 							var slideOption = {
