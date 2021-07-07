@@ -24,6 +24,8 @@
  * @see {@link http://tristen.ca/tablesort/|tablesort}
  * @see {@link http://tristen.ca/tablesort/demo/|tablesort}
  * @see {@link https://github.com/tristen/tablesort|GitHub - tristen/tablesort: A small tablesorter in plain JavaScript}
+ * @see {@link https://cdnjs.com/libraries/tablesort|tablesort - Libraries - cdnjs - The #1 free and open source CDN built to make life easier for developers}
+ * @see {@link https://www.jsdelivr.com/package/npm/tablesort|tablesort CDN by jsDelivr - A CDN for npm and GitHub}
  *
  * @see {@link https://www.w3schools.com/howto/howto_js_sidenav.asp|How To Create a Side Navigation Menu}
  * @see {@link https://www.w3schools.com/howto/howto_css_sidebar_responsive.asp|How To Create a Responsive Sidebar}
@@ -32,6 +34,7 @@
  * @see {@link https://andrealombardo.github.io/BootSideMenu/index.html|BootSideMenu By Andrea Lombardo}
  * @see {@link https://www.jqueryscript.net/menu/Sliding-Side-Menu-Panel-with-jQuery-Bootstrap-BootSideMenu.html|Sliding Side Menu/Panel with jQuery and Bootstrap - BootSideMenu | Free jQuery Plugins}
  * @see {@link https://www.jqueryscript.net/demo/Sliding-Side-Menu-Panel-with-jQuery-Bootstrap-BootSideMenu/|Boot Side Menu jQuery Plugin Demo}
+ * @see {@link https://www.jsdelivr.com/package/npm/BootSideMenu|BootSideMenu CDN by jsDelivr - A CDN for npm and GitHub}
  *
  * @see {@link https://codepen.io/yavuzselim/pen/LNYrBd|Bootstrap table thead fix tbody scroll}
  * @see {@link https://stackoverflow.com/questions/44360360/tbody-focus-does-not-work|javascript - tbody focus does not work - Stack Overflow}
@@ -57,9 +60,9 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 	requirejs.config(tw.ace33022.RequireJSConfig);
 	
 	// Configuration.loadCSS(Configuration["JSLibDir"] + '/tablesort/tablesort.css');
-	// Configuration.loadCSS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css');
 	Configuration.loadCSS('stylesheet/tablesort.css');
-	Configuration.loadCSS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/css/BootSideMenu.css');
+	// Configuration.loadCSS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/css/BootSideMenu.css');
+	Configuration.loadCSS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css');
 	
 	requirejs(["tw.ace33022.vo.OptionCallTrnLog", "tw.ace33022.vo.OptionPutTrnLog", "tw.ace33022.util.browser.CommonForm", "tablesort.number", "sprintfjs"], function(OptionCallTrnLog, OptionPutTrnLog, CommonForm) {
 	
@@ -113,7 +116,8 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 					if (status == 'success') {
 					
 						// Configuration.loadJS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/js/BootSideMenu.js', function() {
-						Configuration.loadJS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/js/BootSideMenu.js', function() {
+						// Configuration.loadJS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/js/BootSideMenu.js', function() {
+						requirejs(["BootSideMenu"], function(BootSideMenu) {
 						
 							var tag;
 							var slideOption = {
