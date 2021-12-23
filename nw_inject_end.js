@@ -44,31 +44,28 @@
  * @see {@link https://www.geeksforgeeks.org/check-whether-html-element-has-scrollbars-using-javascript/|Check whether HTML element has scrollbars using JavaScript - GeeksforGeeks}
  * @see {@link https://stackoverflow.com/questions/3015523/remove-or-disable-focus-border-of-browser-via-javascript/3015596|html - Remove or disable focus border of browser via javascript - Stack Overflow}
  *
+ * @see {@link https://dotblogs.com.tw/kevinya/2013/10/22/125200|[jQuery]設定或是取得radio button的value或是index | kevinya - 點部落}
+ *
  * @todo 2021/06/25 ace 優化捲軸樣式。
  *
  */
 
 Configuration.loadJS(Configuration.requirejsFile, function() {
 
-	var tag;
-
-	var tableId = 'table' + Math.random().toString(36).substr(2, 6);
-	var sideMenuId = 'sideMenu' + Math.random().toString(36).substr(2, 6);
-
-	var optionData = {};
-	
 	requirejs.config(tw.ace33022.RequireJSConfig);
 	
 	// Configuration.loadCSS(Configuration["JSLibDir"] + '/tablesort/tablesort.css');
-	Configuration.loadCSS('stylesheet/tablesort.css');
+	// Configuration.loadCSS('stylesheet/tablesort.css');
 	// Configuration.loadCSS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/css/BootSideMenu.css');
-	Configuration.loadCSS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css');
+	// Configuration.loadCSS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/css/BootSideMenu.css');
 	
-	requirejs(["tw.ace33022.vo.OptionCallTrnLog", "tw.ace33022.vo.OptionPutTrnLog", "tw.ace33022.util.browser.CommonForm", "tablesort.number", "sprintfjs"], function(OptionCallTrnLog, OptionPutTrnLog, CommonForm) {
+	requirejs(["tw.ace33022.vo.OptionCallTrnLog", "tw.ace33022.vo.OptionPutTrnLog", "tw.ace33022.util.browser.CommonForm", "js-logger", "sprintfjs"], function(OptionCallTrnLog, OptionPutTrnLog, CommonForm, Logger) {
 	
 		function loadData() {
 		
 			var status = '';
+			
+			allPeriod = new Array();
 		
 			CommonForm.showMarqueebar({
 			
@@ -93,7 +90,11 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 								vo = new OptionCallTrnLog();
 							
 								vo.setValueFromJSONObject(data["call"][index]);
-								arrVO.push(vo);
+								
+								if (_.indexOf(allPeriod, vo.getConMonth()) == -1) allPeriod.push(vo.getConMonth());
+								
+								// 只保留有委買/賣數量的資料。
+								if ((vo.getBestAskQty() != 0) || (vo.getBestBidQty() != 0)) arrVO.push(vo);
 							}
 							optionData["call"] = arrVO;
 
@@ -103,7 +104,11 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 								vo = new OptionPutTrnLog();
 							
 								vo.setValueFromJSONObject(data["put"][index]);
-								arrVO.push(vo);
+								
+								if (_.indexOf(allPeriod, vo.getConMonth()) == -1) allPeriod.push(vo.getConMonth());
+								
+								// 只保留有委買/賣數量的資料。
+								if ((vo.getBestAskQty() != 0) || (vo.getBestBidQty() != 0)) arrVO.push(vo);
 							}
 							optionData["put"] = arrVO;
 						}	
@@ -113,10 +118,14 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 				},
 				"afterHiddenCallback": function() {
 				
+					condition["period"] = allPeriod.slice();
+					
 					if (status == 'success') {
 					
 						// Configuration.loadJS(Configuration["JSLibDir"] + '/bootstrap/BootSideMenu-1.0.0/js/BootSideMenu.js', function() {
 						// Configuration.loadJS('https://cdn.jsdelivr.net/npm/BootSideMenu@0.0.1/js/BootSideMenu.js', function() {
+			
+						/*
 						requirejs(["BootSideMenu"], function(BootSideMenu) {
 						
 							var tag;
@@ -168,7 +177,7 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 								
 									jQuery('#' + tableId + ' > tbody > tr').remove();
 									
-									createContent(optionType);
+									createContent();
 								}
 							};
 							
@@ -182,8 +191,11 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 								// event.stopPropagation();
 							});
 
-							createContent('CALL');
+							createContent();
 						});
+						*/
+						
+						createContent();
 					}
 					else {
 					
@@ -193,24 +205,64 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 			});
 		}
 		
-		function createContent(optionType) {
+		function createContent() {
 		
 			CommonForm.showMarqueebar({
 			
 				"title": "資料處理中‧‧‧",
 				"onShownCallback": function(closeMarqueebar) {
 				
+					function filter() {
+					
+						var result = new Array();
+						
+						if (condition["period"].length == 0) {
+						
+							result = optionData[condition["optionType"].toLowerCase()].slice();
+						}
+						else {
+						
+							result = optionData[condition["optionType"].toLowerCase()].filter(function(item, index, array) {
+							
+								var result = false;
+								
+								if (condition["period"].indexOf(item.getConMonth()) != -1) {
+								
+									if ((condition["bestAskPrice"] == 0) && (condition["bestBidPrice"] == 0)) {
+									
+										result = true;
+									}	
+									else {
+									
+										// result = item.getBestAskPrice() <= condition["bestAskPrice"] || item.getBestBidPrice() >= condition["bestBidPrice"];
+										// result = item.getBestAskPrice() <= condition["bestAskPrice"];
+										result = item.getBestBidPrice() >= condition["bestBidPrice"];
+									}
+								}
+								
+								return result;
+							});
+						}
+						
+						return result;
+					}
+					
 					var index;
 					var tag;
+					var arrVO = filter();
+		
+					jQuery('#' + tableId + ' > tbody > tr').remove();
 					
-					jQuery('#' + tableId + ' > caption').text(optionType.toUpperCase());
+					jQuery('#' + tableId + ' > caption').text(condition["optionType"].toUpperCase());
 					
-					for (index = 0; index < optionData[optionType.toLowerCase()].length; index++) {
+					// for (index = 0; index < optionData[optionType.toLowerCase()].length; index++) {
+					for (index = 0; index < arrVO.length; index++) {
 
-						vo = optionData[optionType.toLowerCase()][index];
+						// vo = optionData[optionType.toLowerCase()][index];
+						vo = arrVO[index];
 
-						if ((vo.getBestAskQty() == 0) && (vo.getBestBidQty() == 0)) continue;	// 沒有委買/賣數量就不顯示了。
-
+						// if ((vo.getBestAskQty() == 0) && (vo.getBestBidQty() == 0)) continue;	// 沒有委買/賣數量就不顯示了。
+						
 						tag = ''
 								+ '<tr>'
 								+ '  <td class="col-xs-2" style="text-align: center; vertical-align: middle;">' + vo.getConMonth() + '</td>'
@@ -237,7 +289,7 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 
 					jQuery('#' + tableId + ' td').css('padding', '1px');
 					
-					new Tablesort(jQuery('#' + tableId)[0]);
+					// new Tablesort(jQuery('#' + tableId)[0]);
 					
 					closeMarqueebar();
 				},
@@ -249,36 +301,139 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 			});
 		}
 
-		jQuery(window).on('focus', function(event) {
+		var tableId = 'table' + Math.random().toString(36).substr(2, 6);
+		// var sideMenuId = 'sideMenu' + Math.random().toString(36).substr(2, 6);
 
-			if ((jQuery('.modal-open').length == 0) && (jQuery('.modal-backdrop').length == 0)) jQuery('#' + tableId + ' tbody').focus();
-		});
+		var optionData = {};
 
-		tag = ''
-				// + '  <table id="' + tableId + '" class="table table-bordered table-hover table-fixed" style="width: 100%; padding-top: 100px;">'
-				+ '  <table id="' + tableId + '" class="table table-bordered table-fixed" style="width: 100%;">'
-				+ '    <caption style="text-align: center; vertical-align: middle; font-weight: bold;"></caption>'
-				+ '    <thead style="overflow-y: scroll;">'
-				+ '      <tr>'
-				+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">契約月份</th>'
-				+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">履約價</th>'
-				+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">成交量</th>'
-				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣價</th>'
-				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣量</th>'
-				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買價</th>'
-				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買量</th>'
-				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最高價</th>'
-				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最低價</th>'
-				+ '      </tr>'
-				+ '    </thead>'
-				+ '    <tbody tabindex="0" style="overflow-y: scroll;"></tbody>'
-				+ '  </table>'
-				+ '';
+		var allPeriod = new Array();
+
+		var condition = {
+
+			"optionType": "CALL",
+			// "period": ["202206"],
+			"period": [],
+			// "bestAskPrice": 10,
+			"bestAskPrice": 0,
+			// "bestBidPrice": 30
+			"bestBidPrice": 0
+		};
+	
+		var tag = ''
+						// + '  <table id="' + tableId + '" class="table table-bordered table-hover table-fixed" style="width: 100%; padding-top: 100px;">'
+						+ '  <table id="' + tableId + '" class="table table-bordered table-fixed" style="width: 100%;">'
+						+ '    <caption style="text-align: center; vertical-align: middle; font-weight: bold; cursor: pointer;"></caption>'
+						+ '    <thead style="overflow-y: scroll;">'
+						+ '      <tr>'
+						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">契約月份</th>'
+						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">履約價</th>'
+						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">成交量</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣價</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣量</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買價</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買量</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最高價</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最低價</th>'
+						+ '      </tr>'
+						+ '    </thead>'
+						+ '    <tbody tabindex="0" style="overflow-y: scroll;"></tbody>'
+						+ '  </table>'
+						+ '';
 		jQuery('body').append(tag);
 		
 		// jQuery('#' + tableId + ' tbody').css('height', (window.innerHeight - 45) + 'px');
 		jQuery('#' + tableId + ' tbody').css('height', (window.innerHeight - 75) + 'px');
 		jQuery('#' + tableId + ' tbody').css('outline', 'none');	// focus tbody時不顯示外框線。
+		
+		jQuery(window).on('focus', function(event) {
+
+			if ((jQuery('.modal-open').length == 0) && (jQuery('.modal-backdrop').length == 0)) jQuery('#' + tableId + ' tbody').focus();
+		});
+		
+		jQuery('#' + tableId + ' > caption').on('click', function(event) {
+		
+			var btnConfirmId = 'btnConfirm' + Math.random().toString(36).substr(2, 6);
+			var inputCALLId = 'inputCALL' + Math.random().toString(36).substr(2, 6);
+			var inputPUTId = 'inputPUT' + Math.random().toString(36).substr(2, 6);
+			var divPeriodId = 'divPeriod' + Math.random().toString(36).substr(2, 6);
+
+			var tag;
+			var modalHeader = null, modalBody = null, modalFooter = null;
+			var baseModal;
+			
+			var confirmed = false;
+			
+			tag = '<div class="modal-header"><h4 class="modal-title" style="text-align: center;">篩選條件</h4></div>';
+			modalHeader = jQuery(tag);
+			
+			tag = '<div class="modal-body" style="text-align: left;">'
+					+ '  <div class="form-check form-check-inline">'
+					+ '    <input type="radio" id="' + inputCALLId + '" name="optionType" class="form-check-input" value="CALL"><label class="form-check-label" for="' + inputCALLId + '">CALL</label>'
+					+ '    <input type="radio" id="' + inputPUTId + '" name="optionType" class="form-check-input" value="PUT"><label class="form-check-label" for="' + inputPUTId + '">PUT</label>'
+					+ '  </div>'
+					+ '  <div id="' + divPeriodId + '" class="form-check">'
+					+ '  </div>'
+					+ '</div>';
+			modalBody = jQuery(tag);
+			
+			tag = '<div class="modal-footer">'
+					+ '	 <input type="button" id="' + btnConfirmId + '" class="btn btn-primary" value="確認">'
+					+ '	 <input type="button" class="btn" data-dismiss="modal" value="取消">'
+					+ '</div>';
+			modalFooter = jQuery(tag);
+			
+			baseModal = CommonForm.addBaseModal({
+			
+				"modalHeader": modalHeader, 
+				"modalBody": modalBody,
+				"modalFooter": modalFooter
+			});
+			
+			baseModal.on('shown.bs.modal', function() {
+
+				// console.log(jQuery('.modal.fade').css('transition'));
+				// console.log(jQuery('.modal.fade').css('transition-duration'));
+				// console.log(jQuery('.modal.fade').css('transition-delay'));
+				
+				jQuery('#' + inputCALLId).prop('checked', true);
+				if (condition["optionType"] == 'PUT') jQuery('#' + inputPUTId).prop('checked', true);
+				
+				allPeriod.forEach(function(currentValue, index, array) {
+				
+					var inputPeriodId = 'inputPeriod' + Math.random().toString(36).substr(2, 6);
+					var tag = '<input type="checkbox" class="form-check-input" name="period" id="' + inputPeriodId +'" value="' + currentValue + '"><label class="form-check-label" for="' + inputPeriodId + '">' + currentValue + '</label>';
+					
+					if (condition["period"].indexOf(currentValue) != -1) tag = '<input type="checkbox" class="form-check-input" name="period" id="' + inputPeriodId +'" value="' + currentValue + '" checked><label class="form-check-label" for="' + inputPeriodId + '">' + currentValue + '</label>';
+					
+					modalBody.find('#' + divPeriodId).append(tag);
+				});
+			});
+			
+			baseModal.on('hidden.bs.modal', function() {
+			
+				jQuery(this).remove();
+				
+				if (confirmed) createContent();
+			});
+			
+			jQuery('#' + btnConfirmId).on('click', function(event) {
+			
+				confirmed = true;
+				
+				condition["optionType"] = jQuery('input[name*=optionType]:checked').val();
+				
+				condition["period"].length = 0;
+				
+				jQuery('input[name*=period]:checked').each(function(index, element) {
+				
+					condition["period"].push(jQuery(element).val());
+				});
+				
+				baseModal.modal('hide');
+			});
+			
+			baseModal.modal('show');
+		});
 		
 		loadData();
 	});
