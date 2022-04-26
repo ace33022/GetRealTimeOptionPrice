@@ -4,8 +4,6 @@
  *
  * @version 2021/05/13 ace 初始版本。
  *
- * @author ace
- *
  * @see {@link http://requirejs.org/|RequireJS}
  *
  * @see {@link https://jquery.com/|jQuery}
@@ -45,6 +43,8 @@
  * @see {@link https://stackoverflow.com/questions/3015523/remove-or-disable-focus-border-of-browser-via-javascript/3015596|html - Remove or disable focus border of browser via javascript - Stack Overflow}
  *
  * @see {@link https://dotblogs.com.tw/kevinya/2013/10/22/125200|[jQuery]設定或是取得radio button的value或是index | kevinya - 點部落}
+ *
+ * @author ace
  *
  * @todo 2021/06/25 ace 優化捲軸樣式。
  *
@@ -93,6 +93,8 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 								
 								if (_.indexOf(allPeriod, vo.getConMonth()) == -1) allPeriod.push(vo.getConMonth());
 								
+								allStrikePrice.add(vo.getStrikePrice());
+								
 								// 只保留有委買/賣數量的資料。
 								if ((vo.getBestAskQty() != 0) || (vo.getBestBidQty() != 0)) arrVO.push(vo);
 							}
@@ -106,6 +108,8 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 								vo.setValueFromJSONObject(data["put"][index]);
 								
 								if (_.indexOf(allPeriod, vo.getConMonth()) == -1) allPeriod.push(vo.getConMonth());
+								
+								allStrikePrice.add(vo.getStrikePrice());
 								
 								// 只保留有委買/賣數量的資料。
 								if ((vo.getBestAskQty() != 0) || (vo.getBestBidQty() != 0)) arrVO.push(vo);
@@ -216,12 +220,11 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 					
 						var result = new Array();
 						
-						if (condition["period"].length == 0) {
+						if (condition["period"].length != 0) {
 						
-							result = optionData[condition["optionType"].toLowerCase()].slice();
-						}
-						else {
+							// console.log('bestBidPrice' + ':' + condition["bestBidPrice"] + '||' + 'bestAskPrice' + ':' + condition["bestAskPrice"]);
 						
+							// result = optionData[condition["optionType"].toLowerCase()].slice();
 							result = optionData[condition["optionType"].toLowerCase()].filter(function(item, index, array) {
 							
 								var result = false;
@@ -231,12 +234,51 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 									if ((condition["bestAskPrice"] == 0) && (condition["bestBidPrice"] == 0)) {
 									
 										result = true;
+										
+										if ((condition["strikePrice"] != '') && (condition["strikeCondition"] != '')) {
+										
+											result = false;
+										
+											if (condition["strikeCondition"] == 'eq') {
+											
+												if (item.getStrikePrice() == condition["strikePrice"]) result = true;
+											}
+											else if (condition["strikeCondition"] == 'gt') {
+											
+												if (item.getStrikePrice() > condition["strikePrice"]) result = true;
+											}
+											else if (condition["strikeCondition"] == 'lt') {
+											
+												if (item.getStrikePrice() < condition["strikePrice"]) result = true;
+											}
+										}
 									}	
 									else {
 									
-										// result = item.getBestAskPrice() <= condition["bestAskPrice"] || item.getBestBidPrice() >= condition["bestBidPrice"];
-										// result = item.getBestAskPrice() <= condition["bestAskPrice"];
-										result = item.getBestBidPrice() >= condition["bestBidPrice"];
+										if ((item.getBestBidPrice() >= parseFloat(condition["bestBidPrice"])) || (item.getBestAskPrice() <= parseFloat(condition["bestAskPrice"]))) {
+										
+											// console.log(item.getConMonth() + ':' + item.getStrikePrice() + ':' + item.getBestBidPrice() + ':' + item.getBestAskPrice());
+										
+											result = true;
+											
+											if ((condition["strikePrice"] != '') && (condition["strikeCondition"] != '')) {
+											
+												result = false;
+											
+												if (condition["strikeCondition"] == 'eq') {
+												
+													if (item.getStrikePrice() == condition["strikePrice"]) result = true;
+												}
+												else if (condition["strikeCondition"] == 'gt') {
+												
+													if (item.getStrikePrice() > condition["strikePrice"]) result = true;
+												}
+												else if (condition["strikeCondition"] == 'lt') {
+												
+													if (item.getStrikePrice() < condition["strikePrice"]) result = true;
+												}
+											}
+										}
 									}
 								}
 								
@@ -268,10 +310,10 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 								+ '  <td class="col-xs-2" style="text-align: center; vertical-align: middle;">' + vo.getConMonth() + '</td>'
 								+ '  <td class="col-xs-2" style="text-align: right; vertical-align: middle;">' + vo.getStrikePrice() + '</td>'
 								+ '  <td class="col-xs-2" style="text-align: right; vertical-align: middle;">' + vo.getTrnQty() + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getBestAskPrice()) + '</td>'
+								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getBestBidQty() + '</td>'
 								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getBestAskQty() + '</td>'
 								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getBestBidPrice()) + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getBestBidQty() + '</td>'
+								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getBestAskPrice()) + '</td>'
 								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getHighPrice()) + '</td>'
 								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getLowPrice()) + '</td>'
 								+ '</tr>';
@@ -307,16 +349,16 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 		var optionData = {};
 
 		var allPeriod = new Array();
+		var allStrikePrice = new Set();
 
 		var condition = {
 
 			"optionType": "CALL",
-			// "period": ["202206"],
 			"period": [],
-			// "bestAskPrice": 10,
-			"bestAskPrice": 0,
-			// "bestBidPrice": 30
-			"bestBidPrice": 0
+			"bestBidPrice": 50,
+			"bestAskPrice": 5,
+			"strikePrice": "",
+			"strikeCondition": ""
 		};
 	
 		var tag = ''
@@ -328,10 +370,10 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">契約月份</th>'
 						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">履約價</th>'
 						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">成交量</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣價</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買量</th>'
 						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣量</th>'
 						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買價</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買量</th>'
+						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣價</th>'
 						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最高價</th>'
 						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最低價</th>'
 						+ '      </tr>'
@@ -356,12 +398,18 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 			var inputCALLId = 'inputCALL' + Math.random().toString(36).substr(2, 6);
 			var inputPUTId = 'inputPUT' + Math.random().toString(36).substr(2, 6);
 			var divPeriodId = 'divPeriod' + Math.random().toString(36).substr(2, 6);
+			var inputBestAskPrice = 'inputBestAskPrice' + Math.random().toString(36).substr(2, 6);
+			var inputBestBidPrice = 'inputBestBidPrice' + Math.random().toString(36).substr(2, 6);
+			var selectStrikePrice = 'selectStrikePrice' + Math.random().toString(36).substr(2, 6);
+			var selectStrikeCondition = 'selectStrikeCondition' + Math.random().toString(36).substr(2, 6);
 
 			var tag;
 			var modalHeader = null, modalBody = null, modalFooter = null;
 			var baseModal;
 			
 			var confirmed = false;
+			
+			// console.log(Array.from(allStrikePrice).sort());
 			
 			tag = '<div class="modal-header"><h4 class="modal-title" style="text-align: center;">篩選條件</h4></div>';
 			modalHeader = jQuery(tag);
@@ -373,7 +421,37 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 					+ '  </div>'
 					+ '  <div id="' + divPeriodId + '" class="form-check">'
 					+ '  </div>'
-					+ '</div>';
+					+ '  <div>'
+					+ '    <label class="" for="' + inputBestAskPrice + '">委買價：</label><input type="text" id="' + inputBestBidPrice + '" class="">'	// 如何限定只能輸入數字？！
+					+ '    <label class="" for="' + inputBestBidPrice + '">委賣價：</label><input type="text" id="' + inputBestAskPrice + '" class="">'
+					+ '  </div>';
+					
+					if (allStrikePrice.size != 0) {
+					
+						tag += '  <div>';
+						
+						// tag += '    <label>履約價：</label>';
+						
+						tag += '    <label>條件：</label>';
+						tag += '    <select id="' + selectStrikeCondition + '">';
+						tag += '      <option value=""></option>';
+						tag += '      <option value="eq">=</option>';
+						tag += '      <option value="gt">></option>';
+						tag += '      <option value="lt"><</option>';
+						tag += '    </select>';
+						
+						tag += '    <select id="' + selectStrikePrice + '">';
+						tag += '      <option value=""></option>';
+						Array.from(allStrikePrice).sort().forEach(function(currentValue, index, array) {
+						
+							tag += '      <option value="' + currentValue +'">' + currentValue + '</option>';
+						});
+						tag += '    </select>';
+						
+						tag += '  </div>';
+					}
+					
+			tag += '</div>';
 			modalBody = jQuery(tag);
 			
 			tag = '<div class="modal-footer">'
@@ -407,6 +485,12 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 					
 					modalBody.find('#' + divPeriodId).append(tag);
 				});
+				
+				jQuery('#' + inputBestAskPrice).val(condition["bestAskPrice"]);
+				jQuery('#' + inputBestBidPrice).val(condition["bestBidPrice"]);
+				
+				jQuery('#' + selectStrikePrice).val(condition["strikePrice"]);
+				jQuery('#' + selectStrikeCondition).val(condition["strikeCondition"]);
 			});
 			
 			baseModal.on('hidden.bs.modal', function() {
@@ -428,6 +512,12 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 				
 					condition["period"].push(jQuery(element).val());
 				});
+				
+				condition["bestAskPrice"] = jQuery('#' + inputBestAskPrice).val();
+				condition["bestBidPrice"] = jQuery('#' + inputBestBidPrice).val();
+				
+				condition["strikePrice"] = jQuery('#' + selectStrikePrice).val();
+				condition["strikeCondition"] = jQuery('#' + selectStrikeCondition).val();
 				
 				baseModal.modal('hide');
 			});
