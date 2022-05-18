@@ -43,6 +43,7 @@
  * @see {@link https://stackoverflow.com/questions/3015523/remove-or-disable-focus-border-of-browser-via-javascript/3015596|html - Remove or disable focus border of browser via javascript - Stack Overflow}
  *
  * @see {@link https://dotblogs.com.tw/kevinya/2013/10/22/125200|[jQuery]設定或是取得radio button的value或是index | kevinya - 點部落}
+ * @see {@link https://www.wibibi.com/info.php?tid=194|HTML select option 下拉式選單 - Wibibi}
  *
  * @author ace
  *
@@ -75,14 +76,15 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 					jQuery.getJSON('https://script.google.com/macros/s/AKfycbz9p6eDD50vIILu3_i_ehXPrDmNgzMkuCdDvMLbGQDST6UoaEiAZHh7E2ZEXuTQsuef/exec', function(data, textStatus, jqXHR) {
 					
 						status = textStatus;
-
+						
 						if (textStatus == 'success') {
-
-							// console.log(JSON.stringify(data));
 
 							var arrVO;
 							var index;
 							var vo;
+
+							// console.log(JSON.stringify(data));
+							Logger.debug(JSON.stringify(data));
 							
 							arrVO = new Array();
 							for (index = 0; index < data["call"].length; index++) {
@@ -220,11 +222,14 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 					
 						var result = new Array();
 						
+						Logger.debug(condition);
+						
 						if (condition["period"].length != 0) {
 						
 							// console.log('bestBidPrice' + ':' + condition["bestBidPrice"] + '||' + 'bestAskPrice' + ':' + condition["bestAskPrice"]);
 						
 							// result = optionData[condition["optionType"].toLowerCase()].slice();
+							
 							result = optionData[condition["optionType"].toLowerCase()].filter(function(item, index, array) {
 							
 								var result = false;
@@ -241,43 +246,81 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 										
 											if (condition["strikeCondition"] == 'eq') {
 											
-												if (item.getStrikePrice() == condition["strikePrice"]) result = true;
+												// if (item.getStrikePrice() == condition["strikePrice"]) result = true;
 											}
 											else if (condition["strikeCondition"] == 'gt') {
 											
-												if (item.getStrikePrice() > condition["strikePrice"]) result = true;
+												// if (item.getStrikePrice() > condition["strikePrice"]) result = true;
 											}
 											else if (condition["strikeCondition"] == 'lt') {
 											
-												if (item.getStrikePrice() < condition["strikePrice"]) result = true;
+												// if (item.getStrikePrice() < condition["strikePrice"]) result = true;
+											}
+											
+											if (condition["strikeCondition"] == 'ge') {
+											
+												if (item.getStrikePrice() >= condition["strikePrice"]) result = true;
+											}
+											else if (condition["strikeCondition"] == 'le') {
+											
+												if (item.getStrikePrice() <= condition["strikePrice"]) result = true;
 											}
 										}
 									}	
 									else {
 									
-										if ((item.getBestBidPrice() >= parseFloat(condition["bestBidPrice"])) || (item.getBestAskPrice() <= parseFloat(condition["bestAskPrice"]))) {
+										Logger.debug(item.getConMonth() + ':' + item.getStrikePrice() + ':' + item.getBestBidPrice() + ':' + item.getBestAskPrice());
 										
-											// console.log(item.getConMonth() + ':' + item.getStrikePrice() + ':' + item.getBestBidPrice() + ':' + item.getBestAskPrice());
+										if ((condition["strikePrice"] != '') && (condition["strikeCondition"] != '')) {
 										
-											result = true;
+											result = false;
+										
+											if (condition["strikeCondition"] == 'ge') {
 											
-											if ((condition["strikePrice"] != '') && (condition["strikeCondition"] != '')) {
+												if (item.getStrikePrice() >= condition["strikePrice"]) result = true;
+											}
+											else if (condition["strikeCondition"] == 'le') {
+											
+												if (item.getStrikePrice() <= condition["strikePrice"]) result = true;
+											}
+											
+											if (result == true) {
 											
 												result = false;
 											
-												if (condition["strikeCondition"] == 'eq') {
+												if (condition["bestBidPrice"] != 0) result = item.getBestBidPrice() >= parseFloat(condition["bestBidPrice"]);
 												
-													if (item.getStrikePrice() == condition["strikePrice"]) result = true;
-												}
-												else if (condition["strikeCondition"] == 'gt') {
-												
-													if (item.getStrikePrice() > condition["strikePrice"]) result = true;
-												}
-												else if (condition["strikeCondition"] == 'lt') {
-												
-													if (item.getStrikePrice() < condition["strikePrice"]) result = true;
-												}
+												if (condition["bestAskPrice"] != 0) result = item.getBestAskPrice() <= parseFloat(condition["bestAskPrice"]);
 											}
+										}
+										else {
+										
+											Logger.debug(condition["bestBidPrice"] + ':' + item.getBestBidPrice() + ':' + (item.getBestBidPrice() >= parseFloat(condition["bestBidPrice"])));
+											Logger.debug(condition["bestAskPrice"] + ':' + item.getBestAskPrice() + ':' + (item.getBestAskPrice() <= parseFloat(condition["bestAskPrice"])));
+										
+											// if ((condition["bestBidPrice"] != 0) && (item.getBestBidPrice() >= condition["bestBidPrice"])) result = true;
+											if (condition["bestBidPrice"] != 0) result = item.getBestBidPrice() >= parseFloat(condition["bestBidPrice"]);
+											
+											// if ((condition["bestAskPrice"] != 0) && (item.getBestAskPrice() <= parseFloat(condition["bestAskPrice"]))) result = true;
+											if (condition["bestAskPrice"] != 0) result = item.getBestAskPrice() <= parseFloat(condition["bestAskPrice"]);
+										}
+									}
+
+									if ((result == true) && (condition["checkStrikePrice"] != '')) {
+									
+										result = false;
+										
+										// if ((condition["optionType"].toLowerCase() == 'call') && (item.getStrikePrice() >= condition["checkStrikePrice"])) result = true;
+										if (condition["optionType"].toLowerCase() == 'call') {
+										
+											if (((parseFloat(item.getStrikePrice()) + parseFloat(item.getBestBidPrice())) >= condition["checkStrikePrice"]) || ((parseFloat(item.getStrikePrice()) + parseFloat(item.getBestAskPrice())) >= condition["checkStrikePrice"])) result = true;
+										}
+										
+										
+										// if ((condition["optionType"].toLowerCase() == 'put') && (item.getStrikePrice() <= condition["checkStrikePrice"])) result = true;
+										if (condition["optionType"].toLowerCase() == 'put') {
+										
+											if (((parseFloat(item.getStrikePrice()) - parseFloat(item.getBestBidPrice())) <= condition["checkStrikePrice"]) || ((parseFloat(item.getStrikePrice()) - parseFloat(item.getBestAskPrice())) <= condition["checkStrikePrice"])) result = true;
 										}
 									}
 								}
@@ -305,18 +348,40 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 
 						// if ((vo.getBestAskQty() == 0) && (vo.getBestBidQty() == 0)) continue;	// 沒有委買/賣數量就不顯示了。
 						
-						tag = ''
-								+ '<tr>'
-								+ '  <td class="col-xs-2" style="text-align: center; vertical-align: middle;">' + vo.getConMonth() + '</td>'
-								+ '  <td class="col-xs-2" style="text-align: right; vertical-align: middle;">' + vo.getStrikePrice() + '</td>'
-								+ '  <td class="col-xs-2" style="text-align: right; vertical-align: middle;">' + vo.getTrnQty() + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getBestBidQty() + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getBestAskQty() + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getBestBidPrice()) + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getBestAskPrice()) + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getHighPrice()) + '</td>'
-								+ '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getLowPrice()) + '</td>'
-								+ '</tr>';
+						tag = '';
+						tag += '<tr>'
+								 + '  <td class="col-xs-2" style="text-align: center; vertical-align: middle;">' + vo.getConMonth() + '</td>'
+								 + '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getStrikePrice() + '</td>'
+								 + '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getTrnQty() + '</td>'
+								 + '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getBestBidQty() + '</td>'
+								 + '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + vo.getBestAskQty() + '</td>';
+								
+								
+						tag += '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getBestBidPrice()) + '</td>';
+						
+						if (condition["optionType"].toUpperCase() == 'CALL') {
+						
+							tag += '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', parseFloat(vo.getStrikePrice()) + parseFloat(vo.getBestBidPrice())) + '</td>';
+						}
+						else {
+						
+							tag += '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', parseFloat(vo.getStrikePrice()) - parseFloat(vo.getBestBidPrice())) + '</td>';
+						}
+						
+						tag += '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getBestAskPrice()) + '</td>';
+						
+						if (condition["optionType"].toUpperCase() == 'CALL') {
+						
+							tag += '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', parseFloat(vo.getStrikePrice()) + parseFloat(vo.getBestAskPrice())) + '</td>'
+						}
+						else {
+						
+							tag += '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', parseFloat(vo.getStrikePrice()) - parseFloat(vo.getBestAskPrice())) + '</td>'
+						}
+								
+						tag += '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getHighPrice()) + '</td>'
+								 + '  <td class="col-xs-1" style="text-align: right; vertical-align: middle;">' + sprintf('%.2f', vo.getLowPrice()) + '</td>'
+								 + '</tr>';
 						jQuery('#' + tableId + ' tbody').append(tag);
 						
 						jQuery('#' + tableId + ' thead').css('display', 'block');
@@ -355,32 +420,44 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 
 			"optionType": "CALL",
 			"period": [],
-			"bestBidPrice": 50,
-			"bestAskPrice": 5,
+			"bestBidPrice": 0,
+			"bestAskPrice": 0,
+			"checkStrikePrice": "",
 			"strikePrice": "",
 			"strikeCondition": ""
 		};
+		
+		var tag = '';
 	
-		var tag = ''
-						// + '  <table id="' + tableId + '" class="table table-bordered table-hover table-fixed" style="width: 100%; padding-top: 100px;">'
-						+ '  <table id="' + tableId + '" class="table table-bordered table-fixed" style="width: 100%;">'
-						+ '    <caption style="text-align: center; vertical-align: middle; font-weight: bold; cursor: pointer;"></caption>'
-						+ '    <thead style="overflow-y: scroll;">'
-						+ '      <tr>'
-						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">契約月份</th>'
-						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">履約價</th>'
-						+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">成交量</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買量</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣量</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買價</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣價</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最高價</th>'
-						+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最低價</th>'
-						+ '      </tr>'
-						+ '    </thead>'
-						+ '    <tbody tabindex="0" style="overflow-y: scroll;"></tbody>'
-						+ '  </table>'
-						+ '';
+		Logger.useDefaults();
+		
+		// Logger.setLevel(Logger.DEBUG);
+		Logger.setLevel(Logger.INFO);
+		
+		Logger.log = Logger.info;
+		
+		tag = ''
+				// + '  <table id="' + tableId + '" class="table table-bordered table-hover table-fixed" style="width: 100%; padding-top: 100px;">'
+				+ '  <table id="' + tableId + '" class="table table-bordered table-fixed" style="width: 100%;">'
+				+ '    <caption style="text-align: center; vertical-align: middle; font-weight: bold; cursor: pointer;"></caption>'
+				+ '    <thead style="overflow-y: scroll;">'
+				+ '      <tr>'
+				+ '        <th class="col-xs-2" style="text-align: center; vertical-align: middle; padding: 1px;">契約月份</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">履約價</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">成交量</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買量</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣量</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委買價</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">損益點</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">委賣價</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">損益點</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最高價</th>'
+				+ '        <th class="col-xs-1" style="text-align: center; vertical-align: middle; padding: 1px;">最低價</th>'
+				+ '      </tr>'
+				+ '    </thead>'
+				+ '    <tbody tabindex="0" style="overflow-y: scroll;"></tbody>'
+				+ '  </table>'
+				+ '';
 		jQuery('body').append(tag);
 		
 		// jQuery('#' + tableId + ' tbody').css('height', (window.innerHeight - 45) + 'px');
@@ -400,6 +477,7 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 			var divPeriodId = 'divPeriod' + Math.random().toString(36).substr(2, 6);
 			var inputBestAskPrice = 'inputBestAskPrice' + Math.random().toString(36).substr(2, 6);
 			var inputBestBidPrice = 'inputBestBidPrice' + Math.random().toString(36).substr(2, 6);
+			var selectCheckStrikePrice = 'selectCheckStrikePrice' + Math.random().toString(36).substr(2, 6);
 			var selectStrikePrice = 'selectStrikePrice' + Math.random().toString(36).substr(2, 6);
 			var selectStrikeCondition = 'selectStrikeCondition' + Math.random().toString(36).substr(2, 6);
 
@@ -430,14 +508,30 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 					
 						tag += '  <div>';
 						
-						// tag += '    <label>履約價：</label>';
+						tag += '    <label>損益點：</label>';
+						tag += '    <select id="' + selectCheckStrikePrice + '">';
+						tag += '      <option value=""></option>';
+						Array.from(allStrikePrice).sort().forEach(function(currentValue, index, array) {
 						
-						tag += '    <label>條件：</label>';
+							tag += '      <option value="' + currentValue +'">' + currentValue + '</option>';
+						});
+						tag += '    </select>';
+						
+						tag += '  </div>';
+					}
+					
+					if (allStrikePrice.size != 0) {
+					
+						tag += '  <div>';
+						
+						tag += '    <label>履約價：</label>';
 						tag += '    <select id="' + selectStrikeCondition + '">';
 						tag += '      <option value=""></option>';
-						tag += '      <option value="eq">=</option>';
-						tag += '      <option value="gt">></option>';
-						tag += '      <option value="lt"><</option>';
+						// tag += '      <option value="eq">=</option>';
+						// tag += '      <option value="gt">>/option>';
+						// tag += '      <option value="lt"><</option>';
+						tag += '      <option value="ge">&ge;</option>';
+						tag += '      <option value="le">&le;</option>';
 						tag += '    </select>';
 						
 						tag += '    <select id="' + selectStrikePrice + '">';
@@ -489,6 +583,8 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 				jQuery('#' + inputBestAskPrice).val(condition["bestAskPrice"]);
 				jQuery('#' + inputBestBidPrice).val(condition["bestBidPrice"]);
 				
+				jQuery('#' + selectCheckStrikePrice).val(condition["checkStrikePrice"]);
+				
 				jQuery('#' + selectStrikePrice).val(condition["strikePrice"]);
 				jQuery('#' + selectStrikeCondition).val(condition["strikeCondition"]);
 			});
@@ -515,6 +611,8 @@ Configuration.loadJS(Configuration.requirejsFile, function() {
 				
 				condition["bestAskPrice"] = jQuery('#' + inputBestAskPrice).val();
 				condition["bestBidPrice"] = jQuery('#' + inputBestBidPrice).val();
+				
+				condition["checkStrikePrice"] = jQuery('#' + selectCheckStrikePrice).val();
 				
 				condition["strikePrice"] = jQuery('#' + selectStrikePrice).val();
 				condition["strikeCondition"] = jQuery('#' + selectStrikeCondition).val();
